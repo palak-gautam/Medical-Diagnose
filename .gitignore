@@ -1,0 +1,143 @@
+# ══════════════════════════════════════════════════════════════════
+# Medical Diagnose — .gitignore
+# PyTorch | RTX 5050 | CUDA 12.8
+# ══════════════════════════════════════════════════════════════════
+
+
+# ── DATASETS — too large for git ──────────────────────────────────
+dataset/raw/
+dataset/cleaned/
+
+
+# ── MODEL ARTIFACTS — too large for git ───────────────────────────
+artifacts/
+*.pth
+*.pt
+*.pkl
+*.h5
+*.pb
+*.onnx
+
+
+# ── RESULTS — generated, not source ───────────────────────────────
+results/
+
+# ── Accuracy Comparisons, not source ─────────────────────
+accuracy_comparison/
+
+# ── USER UPLOADS — runtime generated ─────────────────────────────
+webapp/static/uploads/
+
+
+# ── PYTHON ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.so
+.eggs/
+*.egg-info/
+dist/
+build/
+*.egg
+MANIFEST
+
+
+# ── VIRTUAL ENVIRONMENTS ──────────────────────────────────────────
+medai_env/
+venv/
+env/
+ENV/
+.venv/
+.env/
+Pipfile.lock
+
+
+# ── JUPYTER CHECKPOINTS ───────────────────────────────────────────
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+
+# ── PYTORCH SPECIFIC ──────────────────────────────────────────────
+# Lightning logs
+lightning_logs/
+# TensorBoard
+runs/
+# CUDA profiling
+*.nvprof
+*.nsys-rep
+
+
+# ── IDE FILES ─────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+
+# ── OS FILES ──────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+
+# ── KAGGLE API KEY — NEVER COMMIT ─────────────────────────────────
+kaggle.json
+.kaggle/
+
+
+# ── ENVIRONMENT VARIABLES ─────────────────────────────────────────
+.env
+.env.local
+
+
+# ── LOGS ──────────────────────────────────────────────────────────
+*.log
+logs/
+
+
+# ── COMPRESSED DOWNLOADS ──────────────────────────────────────────
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+
+# ── TEMPORARY FILES ───────────────────────────────────────────────
+*.tmp
+*.temp
+*.bak
+tmp/
+temp/
+
+
+# ══════════════════════════════════════════════════════════════════
+#  WHAT IS COMMITTED
+# ══════════════════════════════════════════════════════════════════
+#
+#  ✓ README.md
+#  ✓ requirements.txt
+#  ✓ .gitignore
+#  ✓ notebooks/clean_text_datasets.ipynb
+#  ✓ notebooks/clean_image_datasets.ipynb
+#  ✓ notebooks/nlp_encoder.ipynb
+#  ✓ notebooks/cnn_encoder.ipynb
+#  ✓ notebooks/pepa_module.ipynb
+#  ✓ notebooks/pipeline.ipynb
+#  ✓ notebooks/train.ipynb
+#  ✓ notebooks/evaluate.ipynb
+#  ✓ webapp/app.py
+#  ✓ webapp/templates/index.html
+#  ✓ webapp/templates/result.html
+#  ✓ webapp/static/style.css
+#  ✓ webapp/static/js/main.js
+#
+#  EVERYTHING ELSE is generated or too large — ignored above
+# ══════════════════════════════════════════════════════════════════

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Diagnose — AI Medical Diagnosis</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚕</span>
+        <span class="logo-text">MedAI <span class="logo-accent">Diagnose</span></span>
+      </div>
+      <div class="header-nav">
+        <span class="nav-badge">CNN + NLP + PEPA</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <div class="hero-tag">297 Disease Classes · Multimodal AI · SRM IST Delhi-NCR</div>
+      <h1 class="hero-title">
+        Describe your symptoms.<br />
+        <span class="hero-accent">Get AI-powered diagnosis.</span>
+      </h1>
+      <p class="hero-sub">
+        Combining symptom text with medical image recognition through
+        Patient-Evidence-Prior Attention (PEPA) fusion.
+      </p>
+      <div class="hero-stats">
+        <div class="hstat"><span class="hstat-val">{{ top1_accuracy }}%</span><span class="hstat-lbl">Top-1 Accuracy</span></div>
+        <div class="hstat-sep"></div>
+        <div class="hstat"><span class="hstat-val">{{ top3_accuracy }}%</span><span class="hstat-lbl">Top-3 Accuracy</span></div>
+        <div class="hstat-sep"></div>
+        <div class="hstat"><span class="hstat-val">297</span><span class="hstat-lbl">Disease Classes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="page-body">
+    <div class="form-wrap">
+
+      {% if error %}
+      <div class="alert-error">
+        <span>⚠</span> {{ error }}
+      </div>
+      {% endif %}
+
+      <form id="diagnoseForm" action="/predict" method="POST" enctype="multipart/form-data">
+
+        <!-- Step 1: Symptoms -->
+        <div class="card">
+          <div class="card-header">
+            <span class="step-num">01</span>
+            <div>
+              <div class="card-title">Describe Your Symptoms</div>
+              <div class="card-hint">Plain language — e.g. "fever, persistent cough, chest tight for 3 days"</div>
+            </div>
+          </div>
+          <textarea
+            id="symptoms"
+            name="symptoms"
+            class="symptom-textarea"
+            placeholder="I have had fever and dry cough for 5 days, feeling exhausted, chest feels heavy and tight..."
+            rows="5"
+            required
+          ></textarea>
+          <div class="chips-label">Quick-add symptoms:</div>
+          <div class="chips-row" id="chipsGrid">
+            {% for symptom in symptom_list %}
+            <button type="button" class="chip" data-symptom="{{ symptom }}">{{ symptom }}</button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Step 2: Image -->
+        <div class="card">
+          <div class="card-header">
+            <span class="step-num">02</span>
+            <div>
+              <div class="card-title">
+                Upload Medical Image
+                <span class="opt-tag">Optional</span>
+              </div>
+              <div class="card-hint">X-ray · CT scan · skin photo · eye fundus — max 16 MB</div>
+            </div>
+          </div>
+
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="imageInput" name="medical_image"
+                   accept=".jpg,.jpeg,.png,.bmp,.webp" class="file-input-hidden" />
+            <div id="dropIdle" class="drop-idle">
+              <div class="drop-icon">🩻</div>
+              <div class="drop-text">Drag &amp; drop image here</div>
+              <div class="drop-sub">or <span class="drop-browse" id="dropBrowse">browse files</span></div>
+              <div class="drop-formats">JPG · PNG · BMP · WEBP</div>
+            </div>
+            <div id="dropPreview" class="drop-preview" style="display:none;">
+              <img id="previewImg" src="" alt="preview" class="preview-image" />
+              <div class="preview-meta">
+                <span id="previewName" class="preview-filename"></span>
+                <button type="button" class="remove-img-btn" id="removeBtn">✕ Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pepa-note">
+            <span class="pepa-note-icon">ℹ</span>
+            No image? The PEPA gate routes prediction through the NLP branch automatically.
+            Uploading an image enables multimodal CNN + NLP fusion.
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span>Run AI Diagnosis</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+      </form>
+
+      <!-- Loading overlay -->
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+          <div class="loading-ring"></div>
+          <div class="loading-title">Analysing your input...</div>
+          <div class="loading-pipeline" id="loadingPipeline">
+            <div class="lpipe-step active" id="ls1">① TF-IDF encoding</div>
+            <div class="lpipe-step" id="ls2">② NLP encoder (Dense 512→128)</div>
+            <div class="lpipe-step" id="ls3">③ CNN encoder (EfficientNetB0)</div>
+            <div class="lpipe-step" id="ls4">④ PEPA attention fusion</div>
+            <div class="lpipe-step" id="ls5">⑤ Classifier → Top-3 diseases</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title">How It Works</div>
+        <div class="pipeline-viz">
+          <div class="pv-step">
+            <div class="pv-dot pv-dot--nlp"></div>
+            <div class="pv-info">
+              <div class="pv-name">NLP Encoder</div>
+              <div class="pv-desc">TF-IDF(500) → Dense → f_txt ∈ R¹²⁸</div>
+            </div>
+          </div>
+          <div class="pv-step">
+            <div class="pv-dot pv-dot--cnn"></div>
+            <div class="pv-info">
+              <div class="pv-name">CNN Encoder</div>
+              <div class="pv-desc">EfficientNetB0 → f_img ∈ R¹²⁸</div>
+            </div>
+          </div>
+          <div class="pv-step">
+            <div class="pv-dot pv-dot--pepa"></div>
+            <div class="pv-info">
+              <div class="pv-name">PEPA Gate</div>
+              <div class="pv-desc">α = σ(W·[f_img; f_txt]) → fused ∈ R¹²⁸</div>
+            </div>
+          </div>
+          <div class="pv-step">
+            <div class="pv-dot pv-dot--out"></div>
+            <div class="pv-info">
+              <div class="pv-name">Classifier</div>
+              <div class="pv-desc">Dense(256→128→297) → Top-3 diseases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-card disclaimer-card">
+        <div class="sidebar-title">⚕ Medical Disclaimer</div>
+        <p class="disclaimer-text">
+          This system is for educational and research purposes only.
+          It does not replace professional medical consultation or diagnosis.
+          Always consult a qualified healthcare professional.
+        </p>
+      </div>
+
+      <div class="sidebar-card team-card">
+        <div class="sidebar-title">Research Project</div>
+        <div class="team-member">Palak Gautam</div>
+        <div class="guide">Guide: Dr. Madhuri Sharma</div>
+        <div class="institution">SRM IST Delhi-NCR Campus</div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

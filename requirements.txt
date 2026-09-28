@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════════════
+# Medical Diagnose — Requirements
+# CNN + NLP + PEPA Medical Diagnosis Pipeline
+# Framework: PyTorch | GPU: RTX 5050 | CUDA: 12.8
+# ══════════════════════════════════════════════════════════════════
+#
+# INSTALL ORDER:
+#
+# Step 1 — PyTorch with CUDA 12.8 support for RTX 5050 (Blackwell sm_120)
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#
+# Step 2 — Everything else
+#   pip install -r requirements.txt
+#
+# NOTE: Do NOT use plain 'pip install torch' — that installs
+#       the CPU-only build which will not detect your RTX 5050.
+# ══════════════════════════════════════════════════════════════════
+
+
+# ── MACHINE LEARNING ──────────────────────────────────────────────
+scikit-learn>=1.3.0
+imbalanced-learn>=0.11.0
+
+# ── DATA PROCESSING ───────────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+
+# ── IMAGE PROCESSING ──────────────────────────────────────────────
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# ── WEB FRAMEWORK ─────────────────────────────────────────────────
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# ── VISUALISATION ─────────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ── NOTEBOOK SUPPORT ──────────────────────────────────────────────
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0
+
+# ── UTILITIES ─────────────────────────────────────────────────────
+tqdm>=4.65.0
+requests>=2.31.0
+
+# ── KAGGLE DATASET DOWNLOAD ───────────────────────────────────────
+kaggle>=1.5.16

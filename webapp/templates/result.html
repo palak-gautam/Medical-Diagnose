@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Diagnose — Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚕</span>
+        <span class="logo-text">MedAI <span class="logo-accent">Diagnose</span></span>
+      </div>
+      <div class="header-nav">
+        <a href="/" class="back-link">← New Diagnosis</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="results-page">
+
+    <!-- ── Emergency Alert ─────────────────────────────────── -->
+    {% if emergency %}
+    <div class="emergency-banner">
+      <div class="emergency-inner">
+        <span class="emergency-icon">🚨</span>
+        <div>
+          <div class="emergency-title">Seek Emergency Care Immediately</div>
+          <div class="emergency-text">
+            Your symptoms may indicate a serious or life-threatening condition.
+            Call emergency services or go to the nearest hospital immediately.
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="results-layout">
+      <div class="results-main">
+
+        <!-- ── Top Diagnosis ───────────────────────────────── -->
+        <div class="result-card result-card--primary">
+          <div class="result-card-header">
+            <div class="result-rank">Primary Diagnosis</div>
+            <div class="confidence-badge confidence-badge--{{ confidence_level | lower }}">
+              {{ confidence_level }} Confidence
+            </div>
+          </div>
+          <div class="primary-disease">{{ top3[0][0] }}</div>
+          <div class="primary-bar-wrap">
+            <div class="primary-bar">
+              <div class="primary-bar-fill" style="width: {{ (top3[0][1] | float) | round(2) }}%"></div>
+            </div>
+            <span class="primary-pct">{{ top3[0][1] }}%</span>
+          </div>
+
+          <!-- Modality badge -->
+          <div class="modality-row">
+            {% if image_used %}
+            <span class="modality-tag modality-tag--multi">
+              🧬 Multimodal — CNN + NLP + PEPA
+            </span>
+            {% else %}
+            <span class="modality-tag modality-tag--text">
+              📝 Text-only — NLP + PEPA
+            </span>
+            {% endif %}
+            <span class="dataset-info">Trained on {{ num_diseases }} disease classes</span>
+          </div>
+        </div>
+
+        <!-- ── Top-3 Table ─────────────────────────────────── -->
+        <div class="result-card">
+          <div class="card-section-title">Top 3 Differential Diagnoses</div>
+          <div class="diagnosis-list">
+            {% for disease, confidence in top3 %}
+            <div class="diag-row {% if loop.index == 1 %}diag-row--top{% endif %}">
+              <div class="diag-rank">#{{ loop.index }}</div>
+              <div class="diag-info">
+                <div class="diag-name">{{ disease }}</div>
+                <div class="diag-bar-wrap">
+                  <div class="diag-bar">
+                    <div class="diag-bar-fill {% if loop.index == 1 %}diag-bar-fill--top{% endif %}"
+                         style="width: {{ (confidence | float) | round(2) }}%"
+                         data-width="{{ (confidence | float) | round(2) }}"></div>
+                  </div>
+                  <span class="diag-pct">{{ confidence }}%</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- ── Specialist Recommendation ─────────────────── -->
+        <div class="result-card result-card--specialist">
+          <div class="card-section-title">Recommended Specialist</div>
+          <div class="specialist-row">
+            <div class="specialist-icon">👨‍⚕️</div>
+            <div class="specialist-info">
+              <div class="specialist-name">{{ specialist }}</div>
+              <div class="specialist-note">
+                Based on the primary diagnosis of <strong>{{ top3[0][0] }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Input Summary ──────────────────────────────── -->
+        <div class="result-card">
+          <div class="card-section-title">Your Input Summary</div>
+          <div class="input-summary">
+            <div class="summary-label">Symptoms described:</div>
+            <div class="summary-text">{{ user_input }}</div>
+          </div>
+
+          {% if detected_symptoms %}
+          <div class="detected-symptoms">
+            <div class="summary-label">Matched symptom terms ({{ detected_symptoms | length }}):</div>
+            <div class="detected-chips">
+              {% for sym in detected_symptoms %}
+              <span class="detected-chip">{{ sym }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% else %}
+          <div class="no-match-note">
+            No symptom terms matched our database directly.
+            Prediction is based on full TF-IDF text analysis.
+          </div>
+          {% endif %}
+
+          {% if image_used %}
+          <div class="image-info">
+            <span class="image-info-icon">🩻</span>
+            Image uploaded: <strong>{{ image_name }}</strong>
+            — CNN features fused via PEPA gate
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ── Action Buttons ─────────────────────────────── -->
+        <div class="action-row">
+          <a href="/" class="action-btn action-btn--primary">
+            ← Run New Diagnosis
+          </a>
+          <button onclick="window.print()" class="action-btn action-btn--secondary">
+            🖨 Print Results
+          </button>
+        </div>
+
+        <!-- ── Disclaimer ─────────────────────────────────── -->
+        <div class="result-disclaimer">
+          <strong>⚕ Disclaimer:</strong> This AI diagnosis is for educational and research purposes only.
+          It does not constitute professional medical advice, diagnosis, or treatment.
+          Always consult a qualified healthcare professional for medical decisions.
+        </div>
+
+      </div>
+
+      <!-- ── Sidebar ─────────────────────────────────────── -->
+      <aside class="results-sidebar">
+
+        <div class="sidebar-card">
+          <div class="sidebar-title">Confidence Legend</div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--high"></span>
+            <div>
+              <div class="legend-name">High (≥60%)</div>
+              <div class="legend-desc">Strong signal from symptom analysis</div>
+            </div>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--mod"></span>
+            <div>
+              <div class="legend-name">Moderate (30–60%)</div>
+              <div class="legend-desc">Consider differential diagnoses</div>
+            </div>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--low"></span>
+            <div>
+              <div class="legend-name">Low (&lt;30%)</div>
+              <div class="legend-desc">Consult specialist for full workup</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-title">PEPA Fusion Status</div>
+          {% if image_used %}
+          <div class="fusion-status fusion-status--multi">
+            <div class="fusion-icon">🧬</div>
+            <div>
+              <div class="fusion-mode">Multimodal Active</div>
+              <div class="fusion-desc">
+                PEPA gate combined CNN image features with NLP symptom features.
+                α weight determined from [f_img; f_txt].
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="fusion-status fusion-status--text">
+            <div class="fusion-icon">📝</div>
+            <div>
+              <div class="fusion-mode">Text-only Mode</div>
+              <div class="fusion-desc">
+                No image uploaded. PEPA gate set α → 0, routing
+                prediction entirely through the NLP branch.
+                Upload a medical image for multimodal fusion.
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-title">Model Info</div>
+          <div class="model-info-row">
+            <span class="mi-label">Architecture</span>
+            <span class="mi-val">CNN + NLP + PEPA</span>
+          </div>
+          <div class="model-info-row">
+            <span class="mi-label">CNN backbone</span>
+            <span class="mi-val">EfficientNetB0</span>
+          </div>
+          <div class="model-info-row">
+            <span class="mi-label">Disease classes</span>
+            <span class="mi-val">{{ num_diseases }}</span>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Animate bars on load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.diag-bar-fill').forEach(bar => {
+        const w = bar.dataset.width;
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = w + '%'; }, 200);
+      });
+    });
+  </script>
+</body>
+</html>
